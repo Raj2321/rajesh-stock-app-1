@@ -1,20 +1,22 @@
-<section class="container">
+<div class="container">
   <div class="row section">
     <div class="col-md-12">
       <div class="heading">
-        <h3>Stock Tracker</h3>
+        <h3>Stock Tracker App</h3>
       </div>
       <form
-        [formGroup]="stockFormGroup"
-        (ngSubmit)="onSubmit()"
+        [formGroup]="stockTrackerFormGroup"
+        (ngSubmit)="submit()"
         novalidate
         autocomplete="off"
       >
-        <div class="mt-2 card px-4">
+        <div class="mt-4 px-4">
           <div class="row">
             <div class="col-md-12">
               <div class="content mb-4">
-                <p>Enter the symbol of a stock to track (i.e. AAPL, TSLA)</p>
+                <p>
+                  Enter the symbol of a stock to track (i.e. AAPL, TSLA, GOOGL)
+                </p>
               </div>
             </div>
             <div class="col-md-6 col-sm-6 col-6">
@@ -36,8 +38,8 @@
                 <div class="mr-5">
                   <button
                     type="submit"
-                    class="btn btn-success mb-3"
-                    [disabled]="!stockFormGroup.valid"
+                    class="btn btn-primary mb-3"
+                    [disabled]="!stockTrackerFormGroup.valid"
                   >
                     Track Stock
                   </button>
@@ -102,27 +104,14 @@
           <div class="col-md-6 btn-section">
             <a
               routerLink="/sentiment/{{ stock?.symbol }}"
-              class="btn btn-info"
+              class="btn btn-primary"
               routerLinkActive="active"
             >
               Go to social sentiment details
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                class="bi bi-arrow-right-circle"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"
-                />
-              </svg>
             </a>
           </div>
         </div>
       </div>
     </div>
   </div>
-</section>
+</div>

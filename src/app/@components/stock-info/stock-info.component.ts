@@ -1,23 +1,25 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { StockInfo, Stocks } from 'src/app/@model/stock';
-import { StockInfoService } from 'src/app/@services/stock-info.service';
+import { Subscription } from 'rxjs';
+import { StockInfo, Stocks } from '../../@model/stock';
+import { StockInfoService } from '../../@services/stock-info.service';
 
 @Component({
   selector: 'app-stock-info',
   templateUrl: './stock-info.component.html',
   styleUrls: ['./stock-info.component.css'],
 })
-export class StockInfoComponent implements OnInit {
-  stockFormGroup: FormGroup;
+export class StockInfoComponent implements OnInit, OnDestroy {
+  stockTrackerFormGroup: FormGroup;
   stock: StockInfo[] = [];
   stockList: Stocks[] = [];
   quoteData = [];
+  subscription: Subscription = new Subscription();
 
   constructor(private readonly stockService: StockInfoService) {}
 
   ngOnInit(): void {
-    this.stockFormGroup = new FormGroup({
+    this.stockTrackerFormGroup = new FormGroup({
       symbol: new FormControl('', [
         Validators.required,
         Validators.minLength(1),
@@ -25,19 +27,17 @@ export class StockInfoComponent implements OnInit {
       ]),
     });
 
-    let stocks = localStorage.getItem('stockData');
-    this.stockList = stocks ? JSON.parse(stocks) : [];
+    this.stockList = JSON.parse(localStorage.getItem('stockData'));
   }
 
-  onSubmit() {
-    this.getCompanyNames();
+  submit(): void {
+    this.getStckCompanyNames();
   }
 
-  getCompanyNames() {
-    this.stockService
-      .getCompanyInfo(this.stockFormGroup.value.symbol)
-      .subscribe((data: any) => {
-        console.log(data);
+  getStckCompanyNames(): void {
+    const { symbol } = this.stockTrackerFormGroup.value;
+    this.subscription.add(
+      this.stockService.getStckCompanyNames(symbol).subscribe((data: any) => {
         let list = {
           description: data.result[0].description,
           symbol: data.result[0].symbol,
@@ -46,15 +46,16 @@ export class StockInfoComponent implements OnInit {
         setTimeout(() => {
           this.getQuoteDetails();
         }, 500);
-      });
+      })
+    );
   }
 
-  getQuoteDetails() {
-    this.stockService
-      .getQuotesInfo(this.stockFormGroup.value.symbol)
-      .subscribe((data) => {
+  getQuoteDetails(): void {
+    const { symbol } = this.stockTrackerFormGroup.value;
+    this.subscription.add(
+      this.stockService.getQuotesInfo(symbol).subscribe((data) => {
         this.quoteData.push(data);
-        for (var i = 0; i < this.stock.length; i++) {
+        for (let i = 0; i < this.stock.length; i++) {
           this.stockList[i] = {
             description: this.stock[i].description,
             symbol: this.stock[i].symbol,
@@ -68,12 +69,17 @@ export class StockInfoComponent implements OnInit {
           'stockData',
           JSON.stringify(this.stockList.reverse())
         );
-      });
-    this.stockFormGroup.reset();
+      })
+    );
+    this.stockTrackerFormGroup.reset();
   }
 
-  removeStock(indx: number) {
+  removeStock(indx: number): void {
     this.stockList.splice(indx, 1);
     localStorage.setItem('stockData', JSON.stringify(this.stockList));
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }
